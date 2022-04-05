@@ -1,5 +1,6 @@
 package com.springbootconsumer.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -18,6 +19,7 @@ import org.springframework.util.backoff.FixedBackOff;
 import java.util.List;
 
 @Configuration
+@Slf4j
 public class ConsumerConfig {
 
     @Autowired
@@ -43,7 +45,8 @@ public class ConsumerConfig {
         );
 
         var defaultErrorHandler =  new DefaultErrorHandler((record, exception) -> {
-            // recover after 3 failures, with no back off - e.g. send to a dead-letter topic
+            log.info("Executing Recovery Code here for the exception: {} and the failed record is {} ",
+                    exception.getMessage(), record);
         }, new FixedBackOff(1000L, 2L));
         //.addNotRetryableExceptions(exceptiopnToIgnorelist);
         exceptiopnToIgnorelist.forEach(defaultErrorHandler::addNotRetryableExceptions);
@@ -61,7 +64,7 @@ public class ConsumerConfig {
                 .getIfAvailable(() -> new DefaultKafkaConsumerFactory<>(this.kafkaProperties.buildConsumerProperties())));
         factory.setBatchListener(true);
         factory.setCommonErrorHandler(errorHandler());
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        //factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         return factory;
     }
 

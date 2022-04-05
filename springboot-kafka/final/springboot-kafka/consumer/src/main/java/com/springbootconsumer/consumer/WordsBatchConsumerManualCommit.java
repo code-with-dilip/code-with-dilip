@@ -10,16 +10,17 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
+//@Component
 @Slf4j
-public class WordsBatchConsumer {
+public class WordsBatchConsumerManualCommit implements BatchAcknowledgingMessageListener<String, String> {
 
 
+    @Override
     @KafkaListener(
             topics = {"words"},
         containerFactory = "batchKafkaListenerContainerFactory"
     )
-    public void onMessage(List<ConsumerRecord<String, String>> consumerRecords) {
+    public void onMessage(List<ConsumerRecord<String, String>> consumerRecords, Acknowledgment ack) {
 
         log.info("Total number of consumer Records : {} " , consumerRecords.size());
         consumerRecords.forEach((record) -> {
@@ -31,8 +32,11 @@ public class WordsBatchConsumer {
             }catch(Exception e){
                 log.error("Exception Observed");
                 throw new BatchListenerFailedException("Failed to process Record : ", record);
+
             }
         });
+        assert ack != null;
+        ack.acknowledge();
     }
 
 }
