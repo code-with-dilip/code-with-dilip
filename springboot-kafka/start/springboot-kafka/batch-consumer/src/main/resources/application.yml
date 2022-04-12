@@ -1,7 +1,5 @@
-spring:
-  profiles:
-    active: local
-  application:
-    name: BatchKafkaConsumerApplication
 server:
   port: 8081
+spring:
+  application:
+    name: BatchKafkaConsumerApplication

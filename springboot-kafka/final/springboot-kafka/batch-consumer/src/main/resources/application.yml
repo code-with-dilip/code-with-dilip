@@ -1,16 +1,6 @@
 spring:
-  profiles:
-    active: local
   application:
     name: BatchKafkaConsumerApplication
-server:
-  port: 8081
-
----
-spring:
-  config:
-    activate:
-      on-profile: local
   kafka:
     consumer:
       bootstrap-servers: localhost:9092

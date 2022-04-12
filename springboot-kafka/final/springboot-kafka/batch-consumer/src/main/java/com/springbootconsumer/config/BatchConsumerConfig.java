@@ -25,6 +25,20 @@ public class BatchConsumerConfig {
     KafkaProperties kafkaProperties;
 
     @Bean
+    @ConditionalOnMissingBean(name = "batchKafkaListenerContainerFactory")
+    ConcurrentKafkaListenerContainerFactory<?, ?> batchKafkaListenerContainerFactory(
+            ConcurrentKafkaListenerContainerFactoryConfigurer configurer,
+            ObjectProvider<ConsumerFactory<Object, Object>> kafkaConsumerFactory) {
+        ConcurrentKafkaListenerContainerFactory<Object, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        configurer.configure(factory, kafkaConsumerFactory
+                .getIfAvailable(() -> new DefaultKafkaConsumerFactory<>(this.kafkaProperties.buildConsumerProperties())));
+        factory.setBatchListener(true);
+        factory.setCommonErrorHandler(errorHandler());
+        //factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        return factory;
+    }
+
+    @Bean
     @ConditionalOnMissingBean(name = "kafkaListenerContainerFactory")
     ConcurrentKafkaListenerContainerFactory<?, ?> kafkaListenerContainerFactory(
             ConcurrentKafkaListenerContainerFactoryConfigurer configurer,
@@ -52,19 +66,6 @@ public class BatchConsumerConfig {
 
         return defaultErrorHandler;
     }
-
-    @Bean
-    @ConditionalOnMissingBean(name = "batchKafkaListenerContainerFactory")
-    ConcurrentKafkaListenerContainerFactory<?, ?> batchKafkaListenerContainerFactory(
-            ConcurrentKafkaListenerContainerFactoryConfigurer configurer,
-            ObjectProvider<ConsumerFactory<Object, Object>> kafkaConsumerFactory) {
-        ConcurrentKafkaListenerContainerFactory<Object, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        configurer.configure(factory, kafkaConsumerFactory
-                .getIfAvailable(() -> new DefaultKafkaConsumerFactory<>(this.kafkaProperties.buildConsumerProperties())));
-        factory.setBatchListener(true);
-        factory.setCommonErrorHandler(errorHandler());
-        //factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
-        return factory;
-    }
-
 }
+
+
