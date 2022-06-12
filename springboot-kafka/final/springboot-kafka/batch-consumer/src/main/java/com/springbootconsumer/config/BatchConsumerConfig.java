@@ -50,6 +50,11 @@ public class BatchConsumerConfig {
         //.addNotRetryableExceptions(exceptiopnToIgnorelist);
         exceptiopnToIgnorelist.forEach(defaultErrorHandler::addNotRetryableExceptions);
 
+        defaultErrorHandler.setRetryListeners((record, ex, deliveryAttempt) ->
+                        log.info("Failed Record in Retry Listener  exception : {} , deliveryAttempt : {} ", ex.getMessage(), deliveryAttempt)
+        );
+
+
         return defaultErrorHandler;
     }
 }
